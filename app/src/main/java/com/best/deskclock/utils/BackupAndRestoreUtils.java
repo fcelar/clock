@@ -33,6 +33,7 @@ import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.data.Weekdays;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
+import com.best.deskclock.provider.AlarmMission;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -172,6 +173,8 @@ public class BackupAndRestoreUtils {
                 alarmObject.put("crescendoDuration", alarm.crescendoDuration);
                 alarmObject.put("alarmVolume", alarm.alarmVolume);
                 alarmObject.put("manualSortOrder", alarm.manualSortOrder);
+                alarmObject.put("alarmMission", alarm.alarmMission);
+                alarmObject.put("alarmMissionData", alarm.alarmMissionData);
 
                 if (alarm.daysOfWeek.isRepeating() || !alarm.isSpecifiedDate()) {
                     alarmsArray.put(alarmObject);
@@ -377,6 +380,8 @@ public class BackupAndRestoreUtils {
         int crescendoDuration = alarmObject.optInt("crescendoDuration", SettingsDAO.getAlarmVolumeCrescendoDuration(prefs));
         int alarmVolume = alarmObject.optInt("alarmVolume", audioManager.getStreamVolume(STREAM_ALARM));
         int manualSortOrder = alarmObject.optInt("manualSortOrder", 0);
+        int alarmMission = alarmObject.optInt("alarmMission", AlarmMission.TYPE_NONE);
+        String alarmMissionData = alarmObject.optString("alarmMissionData", "");
 
         String alarmRingtone;
         if (RingtoneUtils.isRandomRingtone(Uri.parse(alert))) {
@@ -408,7 +413,7 @@ public class BackupAndRestoreUtils {
 
         restoredAlarm = new Alarm(id, enabled, year, month, day, hour, minutes, vibrate, vibrationPattern, flash,
             Weekdays.fromBits(daysOfWeek), label, syncAlarmByLabel, alarmRingtone, deleteAfterUse, autoSilenceDuration, snoozeDuration,
-            missedAlarmRepeatLimit, crescendoDuration, alarmVolume, manualSortOrder);
+            missedAlarmRepeatLimit, crescendoDuration, alarmVolume, manualSortOrder, alarmMission, alarmMissionData);
 
         restoredAlarm.addAlarm(contentResolver);
 

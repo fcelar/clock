@@ -124,6 +124,18 @@ public final class ClockContract {
          * <p>Type: INTEGER</p>
          */
         String MANUAL_SORT_ORDER = "manualSortOrder";
+
+        /**
+         * Alarm mission type required before snooze/dismiss.
+         * <p>Type: INTEGER</p>
+         */
+        String ALARM_MISSION = "alarmMission";
+
+        /**
+         * Alarm mission payload (e.g. QR content).
+         * <p>Type: STRING</p>
+         */
+        String ALARM_MISSION_DATA = "alarmMissionData";
     }
 
     /**

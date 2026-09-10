@@ -60,8 +60,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.Insets;
@@ -85,6 +87,7 @@ import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.uicomponents.AnalogClock;
 import com.best.deskclock.uicomponents.PillView;
+import com.best.deskclock.uicomponents.toast.CustomToast;
 import com.best.deskclock.uidata.UiConfig;
 import com.best.deskclock.utils.AnimatorUtils;
 import com.best.deskclock.utils.ClockUtils;
@@ -95,6 +98,9 @@ import com.best.deskclock.utils.RingtoneUtils;
 import com.best.deskclock.utils.SdkUtils;
 import com.best.deskclock.utils.ThemeUtils;
 import com.google.android.material.button.MaterialButton;
+
+import io.github.g00fy2.quickie.QRResult;
+import io.github.g00fy2.quickie.ScanQRCode;
 
 import java.io.File;
 import java.util.Random;
@@ -172,6 +178,10 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
     private final Random mMissionRandom = new Random();
     private AlarmMathMissionController mMathMissionController;
+    private boolean mQrCodeScannerLaunched;
+
+    private final ActivityResultLauncher<Void> mQrCodeScannerLauncher =
+        registerForActivityResult(new ScanQRCode(), this::handleScannedQrCode);
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -1370,6 +1380,18 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
 
+        if (action == MISSION_ACTION_DISMISS && SettingsDAO.isQrCodeChallengeEnabled(getPrefs())) {
+            if (!mQrCodeScannerLaunched) {
+                mQrCodeScannerLaunched = true;
+
+                resetAnimations();
+
+                mQrCodeScannerLauncher.launch(null);
+            }
+
+            return;
+        }
+
         String mathHardnessLevel = SettingsDAO.isPerAlarmMathHardnessLevelDisabled(getPrefs())
             ? SettingsDAO.getAlarmMathHardnessLevel(getPrefs())
             : mAlarm.mathHardnessLevel;
@@ -1387,6 +1409,35 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         resetAnimations();
 
         mMathMissionController.requestMissionAction(action, mathHardnessLevel, mMissionRandom);
+    }
+
+    private void handleScannedQrCode(QRResult result) {
+        mQrCodeScannerLaunched = false;
+
+        if (mAlarmHandled || mAlarmInstance == null) {
+            return;
+        }
+
+        if (result instanceof QRResult.QRSuccess success) {
+            final String registeredQrCode = SettingsDAO.getAlarmQrCode(getPrefs());
+
+            if (registeredQrCode.isEmpty() || registeredQrCode.equals(success.getContent().getRawValue())) {
+                dismiss();
+            } else {
+                showQrCodeToast(R.string.qr_code_wrong_code);
+            }
+        } else if (result instanceof QRResult.QRMissingPermission) {
+            showQrCodeToast(R.string.qr_code_camera_permission_denied);
+        }
+    }
+
+    private void showQrCodeToast(@StringRes int messageResId) {
+        int style = ThemeUtils.getAccentStyle(this,
+            SettingsDAO.isAutoNightAccentColorEnabled(getPrefs()),
+            SettingsDAO.getAccentColor(getPrefs()),
+            SettingsDAO.getNightAccentColor(getPrefs()));
+
+        CustomToast.show(this, style, getGeneralTypeface(), messageResId);
     }
 
     /**

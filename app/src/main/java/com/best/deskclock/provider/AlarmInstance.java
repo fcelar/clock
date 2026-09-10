@@ -526,7 +526,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
      * @return the time when alarm should be silence, or null if never
      */
     @Nullable
-    public Calendar getTimeout(@NonNull Context context, boolean hasMathMission) {
+    public Calendar getTimeout(@NonNull Context context, boolean hasMission) {
         Calendar calendar = getAlarmTime();
 
         if (mAutoSilenceDuration == TIMEOUT_NEVER) {
@@ -544,7 +544,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             durationSeconds = mAutoSilenceDuration;
         }
 
-        if (hasMathMission) {
+        if (hasMission) {
             durationSeconds = Math.max(durationSeconds, DEFAULT_AUTO_SILENCE_DURATION);
         }
 

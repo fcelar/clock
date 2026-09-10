@@ -72,6 +72,9 @@ import com.best.deskclock.utils.RingtoneUtils;
 import com.best.deskclock.utils.ThemeUtils;
 import com.best.deskclock.utils.Utils;
 
+import io.github.g00fy2.quickie.QRResult;
+import io.github.g00fy2.quickie.ScanQRCode;
+
 import java.util.List;
 
 public class AlarmSettingsFragment extends BaseSettingsScreenFragment
@@ -148,6 +151,8 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
     ListPreference mShakeActionPref;
     CustomSliderPreference mShakeIntensityPref;
     SwitchPreferenceCompat mEnablePerAlarmMathHardnessLevelPref;
+    SwitchPreferenceCompat mEnableQrCodeChallengePref;
+    Preference mAlarmQrCodePref;
     ListPreference mSortAlarmPref;
     SwitchPreferenceCompat mDisplayEnabledAlarmsFirstPref;
     SwitchPreferenceCompat mEnableAlarmFabLongPressPref;
@@ -215,6 +220,9 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
             });
         });
 
+    private final ActivityResultLauncher<Void> qrCodeScannerLauncher =
+        registerForActivityResult(new ScanQRCode(), this::handleScannedQrCode);
+
     @Override
     protected String getFragmentTitle() {
         return getString(R.string.alarm_settings);
@@ -263,6 +271,8 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
         mShakeActionPref = findPreference(KEY_SHAKE_ACTION);
         mShakeIntensityPref = findPreference(KEY_SHAKE_INTENSITY);
         mEnablePerAlarmMathHardnessLevelPref = findPreference(KEY_ENABLE_PER_ALARM_MATH_HARDNESS_LEVEL);
+        mEnableQrCodeChallengePref = findPreference(KEY_ENABLE_QR_CODE_CHALLENGE);
+        mAlarmQrCodePref = findPreference(KEY_ALARM_QR_CODE);
         mSortAlarmPref = findPreference(KEY_SORT_ALARM);
         mDisplayEnabledAlarmsFirstPref = findPreference(KEY_DISPLAY_ENABLED_ALARMS_FIRST);
         mEnableAlarmFabLongPressPref = findPreference(KEY_ENABLE_ALARM_FAB_LONG_PRESS);
@@ -386,6 +396,19 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
                 } else {
                     triggerDisableSettingDialog(KEY_ENABLE_PER_ALARM_MATH_HARDNESS_LEVEL);
                     return false;
+                }
+            }
+
+            case KEY_ENABLE_QR_CODE_CHALLENGE -> {
+                Utils.performHapticFeedback(getView(), isVibrationsEnabled(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                if ((boolean) newValue) {
+                    // The setting is only enabled once a QR code has been successfully registered
+                    qrCodeScannerLauncher.launch(null);
+                    return false;
+                } else {
+                    getPrefs().edit().remove(KEY_ALARM_QR_CODE).apply();
+                    mAlarmQrCodePref.setVisible(false);
                 }
             }
 
@@ -623,9 +646,36 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
                 true, null);
 
             case KEY_DEFAULT_ALARM_RINGTONE -> startActivity(RingtonePickerActivity.createAlarmRingtonePickerIntentForSettings(context));
+
+            case KEY_ALARM_QR_CODE -> qrCodeScannerLauncher.launch(null);
         }
 
         return true;
+    }
+
+    private void handleScannedQrCode(QRResult result) {
+        final Context appContext = requireContext().getApplicationContext();
+
+        if (result instanceof QRResult.QRSuccess success) {
+            final String rawValue = success.getContent().getRawValue();
+
+            if (rawValue == null || rawValue.isEmpty()) {
+                CustomToast.show(appContext, getAccentStyle(), getGeneralTypeface(), R.string.qr_code_scan_error);
+                return;
+            }
+
+            getPrefs().edit().putString(KEY_ALARM_QR_CODE, rawValue).apply();
+
+            mEnableQrCodeChallengePref.setChecked(true);
+            mAlarmQrCodePref.setVisible(true);
+            mAlarmQrCodePref.setSummary(rawValue);
+
+            CustomToast.show(appContext, getAccentStyle(), getGeneralTypeface(), R.string.qr_code_registered);
+        } else if (result instanceof QRResult.QRMissingPermission) {
+            CustomToast.show(appContext, getAccentStyle(), getGeneralTypeface(), R.string.qr_code_camera_permission_denied);
+        } else if (result instanceof QRResult.QRError) {
+            CustomToast.show(appContext, getAccentStyle(), getGeneralTypeface(), R.string.qr_code_scan_error);
+        }
     }
 
     @Override
@@ -754,6 +804,12 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
         }
 
         mEnablePerAlarmMathHardnessLevelPref.setOnPreferenceChangeListener(this);
+
+        mEnableQrCodeChallengePref.setOnPreferenceChangeListener(this);
+
+        mAlarmQrCodePref.setVisible(SettingsDAO.isQrCodeChallengeEnabled(getPrefs()));
+        mAlarmQrCodePref.setSummary(SettingsDAO.getAlarmQrCode(getPrefs()));
+        mAlarmQrCodePref.setOnPreferenceClickListener(this);
 
         mSortAlarmPref.setOnPreferenceChangeListener(this);
         mSortAlarmPref.setSummary(mSortAlarmPref.getEntry());

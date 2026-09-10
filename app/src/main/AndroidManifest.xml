@@ -192,6 +192,12 @@
             android:windowSoftInputMode="stateAlwaysHidden"
             tools:ignore="DiscouragedApi, NonResizeableActivity" />
 
+        <!-- Allow the QR code scanner to be displayed over the lock screen when an alarm is triggered -->
+        <activity
+            android:name="io.github.g00fy2.quickie.QRScannerActivity"
+            android:showWhenLocked="true"
+            tools:node="merge" />
+
         <activity
             android:name="com.best.deskclock.settings.AlarmDisplayPreviewActivity"
             android:excludeFromRecents="true"

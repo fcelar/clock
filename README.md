@@ -37,6 +37,7 @@ It combines modern design, powerful features, and transparency — giving you fu
   * Flip or shake your device
   * Use power or volume buttons to snooze/stop
   * Solve math problems
+  * Scan a QR code
 * Swipe to delete, duplicate, or customize alarms
 * Custom titles, backgrounds, and ringtones (including random playback)
 

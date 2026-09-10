@@ -323,6 +323,28 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/qr_code_challenge_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="key_enable_qr_code_challenge"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/enable_qr_code_challenge_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <Preference
+            android:key="key_alarm_qr_code"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/register_qr_code_title"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/miscellaneous_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">

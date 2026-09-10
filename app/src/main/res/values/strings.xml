@@ -316,6 +316,10 @@
     <string name="math_challenge_prompt">What is %1$d + %2$d?</string>
     <!-- Error shown when alarm mission answer is incorrect. -->
     <string name="math_challenge_wrong_answer">Incorrect answer</string>
+    <!-- Toast shown when the scanned QR code does not match the registered one. -->
+    <string name="qr_code_wrong_code">This is not the registered QR code</string>
+    <!-- Toast shown when the camera permission has not been granted to scan a QR code. -->
+    <string name="qr_code_camera_permission_denied">Camera permission is required to scan a QR code</string>
 
     <!-- ******************* -->
     <!-- **     CLOCK     ** -->
@@ -1018,6 +1022,16 @@
     <string name="enable_per_alarm_math_hardness_level_title">Use a custom math hardness level for each alarm</string>
     <!-- Dialog message when the "Set a math hardness level for each alarm" setting is disabled. -->
     <string name="enable_per_alarm_math_hardness_level_dialog_message">Custom math hardness levels will be reset.%s</string>
+    <!-- Category title for QR code challenge settings -->
+    <string name="qr_code_challenge_category_title">QR code challenge</string>
+    <!-- Setting title to scan a QR code to dismiss the alarm. -->
+    <string name="enable_qr_code_challenge_title">Scan a QR code to dismiss the alarm</string>
+    <!-- Setting title to register the QR code that must be scanned to dismiss the alarm. -->
+    <string name="register_qr_code_title">Register a QR code</string>
+    <!-- Toast shown when a QR code has been successfully registered. -->
+    <string name="qr_code_registered">QR code registered</string>
+    <!-- Toast shown when the QR code scan fails. -->
+    <string name="qr_code_scan_error">Unable to scan the QR code</string>
 
     <!-- *********************************** -->
     <!-- **     ALARM DISPLAY SETTINGS    ** -->

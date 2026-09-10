@@ -1080,6 +1080,21 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if a QR code must be scanned to dismiss alarms. {@code false} otherwise.
+     */
+    public static boolean isQrCodeChallengeEnabled(@NonNull SharedPreferences pref) {
+        // Default value must match the one in res/xml/settings_alarm.xml
+        return pref.getBoolean(KEY_ENABLE_QR_CODE_CHALLENGE, DEFAULT_ENABLE_QR_CODE_CHALLENGE);
+    }
+
+    /**
+     * @return the content of the registered QR code that must be scanned to dismiss alarms.
+     */
+    public static String getAlarmQrCode(@NonNull SharedPreferences prefs) {
+        return prefs.getString(KEY_ALARM_QR_CODE, DEFAULT_ALARM_QR_CODE);
+    }
+
+    /**
      * @return the alarm sorting by time, by time of next alarm and by name.
      */
     public static String getAlarmSorting(@NonNull SharedPreferences prefs) {

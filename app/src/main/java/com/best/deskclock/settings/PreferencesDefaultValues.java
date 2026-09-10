@@ -125,6 +125,8 @@ public class PreferencesDefaultValues {
     public static final String MATH_HARDNESS_LEVEL_EASY = "easy";
     public static final String MATH_HARDNESS_LEVEL_NORMAL = "normal";
     public static final String MATH_HARDNESS_LEVEL_HARD = "hard";
+    public static final boolean DEFAULT_ENABLE_QR_CODE_CHALLENGE = false;
+    public static final String DEFAULT_ALARM_QR_CODE = "";
     public static final String DEFAULT_SORT_BY_ALARM_TIME = "0";
     public static final String SORT_ALARM_BY_NEXT_ALARM_TIME = "1";
     public static final String SORT_ALARM_BY_NAME = "2";

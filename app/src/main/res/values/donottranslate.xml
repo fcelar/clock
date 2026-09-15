@@ -331,6 +331,21 @@
         <item>hard</item>
     </string-array>
 
+    <!-- Entries listed in the ListPreference when invoking the alarm challenge type preference. -->
+    <string-array name="alarm_challenge_type_entries">
+        <item>@string/label_off</item>
+        <item>@string/alarm_challenge_type_math</item>
+        <item>@string/alarm_challenge_type_qr_code</item>
+        <item>@string/alarm_challenge_type_any_qr_code</item>
+    </string-array>
+    <!-- Values that are retrieved from the ListPreference. These must match the alarm_challenge_type_entries above. -->
+    <string-array name="alarm_challenge_type_values" translatable="false">
+        <item>off</item>
+        <item>math</item>
+        <item>qr_code</item>
+        <item>any_qr_code</item>
+    </string-array>
+
     <!-- Entries listed in the ListPreference when invoking the clock style preference. -->
     <string-array name="clock_style_entries">
         <item>@string/clock_style_analog</item>

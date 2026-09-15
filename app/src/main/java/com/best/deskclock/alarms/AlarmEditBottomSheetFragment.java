@@ -896,7 +896,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindAlarmHardnessLevel() {
-        if (SettingsDAO.isPerAlarmMathHardnessLevelDisabled(mPrefs)) {
+        if (!SettingsDAO.isMathChallengeEnabled(mPrefs) || SettingsDAO.isPerAlarmMathHardnessLevelDisabled(mPrefs)) {
             mBinding.mathHardnessLevelLayout.setVisibility(GONE);
             return;
         }

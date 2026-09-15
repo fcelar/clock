@@ -1008,8 +1008,16 @@
     <string name="flip_action_title">Device flip action</string>
     <!-- Setting title for the shake action setting. -->
     <string name="shake_action_title">Device shake action</string>
-    <!-- Category title for math challenge settings -->
-    <string name="math_challenge_category_title">Math challenge</string>
+    <!-- Category title for challenge settings (math problem or QR code required to snooze/dismiss alarms) -->
+    <string name="challenge_category_title">Challenge</string>
+    <!-- Setting title to select the type of challenge required to snooze or dismiss alarms -->
+    <string name="alarm_challenge_type_title">Challenge type</string>
+    <!-- Challenge type entry: solve a math problem -->
+    <string name="alarm_challenge_type_math">Solve a math problem</string>
+    <!-- Challenge type entry: scan the registered QR code -->
+    <string name="alarm_challenge_type_qr_code">Scan the registered QR code</string>
+    <!-- Challenge type entry: scan any QR code -->
+    <string name="alarm_challenge_type_any_qr_code">Scan any QR code</string>
     <!-- Setting title to change the math hardness level -->
     <string name="math_hardness_level_title">Math hardness level</string>
     <!-- Setting title to change the math hardness level to Easy -->
@@ -1022,11 +1030,7 @@
     <string name="enable_per_alarm_math_hardness_level_title">Use a custom math hardness level for each alarm</string>
     <!-- Dialog message when the "Set a math hardness level for each alarm" setting is disabled. -->
     <string name="enable_per_alarm_math_hardness_level_dialog_message">Custom math hardness levels will be reset.%s</string>
-    <!-- Category title for QR code challenge settings -->
-    <string name="qr_code_challenge_category_title">QR code challenge</string>
-    <!-- Setting title to scan a QR code to dismiss the alarm. -->
-    <string name="enable_qr_code_challenge_title">Scan a QR code to dismiss the alarm</string>
-    <!-- Setting title to register the QR code that must be scanned to dismiss the alarm. -->
+    <!-- Setting title to register the QR code that must be scanned to snooze or dismiss the alarm. -->
     <string name="register_qr_code_title">Register a QR code</string>
     <!-- Toast shown when a QR code has been successfully registered. -->
     <string name="qr_code_registered">QR code registered</string>

@@ -179,6 +179,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
     private final Random mMissionRandom = new Random();
     private AlarmMathMissionController mMathMissionController;
     private boolean mQrCodeScannerLaunched;
+    private int mQrCodeAction;
 
     private final ActivityResultLauncher<Void> mQrCodeScannerLauncher =
         registerForActivityResult(new ScanQRCode(), this::handleScannedQrCode);
@@ -1380,9 +1381,10 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
 
-        if (action == MISSION_ACTION_DISMISS && SettingsDAO.isQrCodeChallengeEnabled(getPrefs())) {
+        if (SettingsDAO.isQrCodeChallengeEnabled(getPrefs())) {
             if (!mQrCodeScannerLaunched) {
                 mQrCodeScannerLaunched = true;
+                mQrCodeAction = action;
 
                 resetAnimations();
 
@@ -1392,9 +1394,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
 
-        String mathHardnessLevel = SettingsDAO.isPerAlarmMathHardnessLevelDisabled(getPrefs())
-            ? SettingsDAO.getAlarmMathHardnessLevel(getPrefs())
-            : mAlarm.mathHardnessLevel;
+        final String mathHardnessLevel = SettingsDAO.getEffectiveMathHardnessLevel(getPrefs(), mAlarm);
 
         if (mathHardnessLevel.equals(DEFAULT_MATH_HARDNESS_LEVEL)) {
             if (action == MISSION_ACTION_SNOOZE) {
@@ -1420,9 +1420,16 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
         if (result instanceof QRResult.QRSuccess success) {
             final String registeredQrCode = SettingsDAO.getAlarmQrCode(getPrefs());
+            final boolean isCodeAccepted = SettingsDAO.isAnyQrCodeAccepted(getPrefs())
+                || registeredQrCode.isEmpty()
+                || registeredQrCode.equals(success.getContent().getRawValue());
 
-            if (registeredQrCode.isEmpty() || registeredQrCode.equals(success.getContent().getRawValue())) {
-                dismiss();
+            if (isCodeAccepted) {
+                if (mQrCodeAction == MISSION_ACTION_SNOOZE) {
+                    snooze();
+                } else {
+                    dismiss();
+                }
             } else {
                 showQrCodeToast(R.string.qr_code_wrong_code);
             }

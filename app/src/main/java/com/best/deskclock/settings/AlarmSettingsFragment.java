@@ -3,8 +3,12 @@
 package com.best.deskclock.settings;
 
 import static android.app.Activity.RESULT_OK;
+import static com.best.deskclock.settings.PreferencesDefaultValues.ALARM_CHALLENGE_TYPE_MATH;
+import static com.best.deskclock.settings.PreferencesDefaultValues.ALARM_CHALLENGE_TYPE_QR_CODE;
 import static com.best.deskclock.settings.PreferencesDefaultValues.ALARM_SNOOZE_DURATION_DISABLED;
 import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_ALARM_VOLUME;
+import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_MATH_HARDNESS_LEVEL;
+import static com.best.deskclock.settings.PreferencesDefaultValues.MATH_HARDNESS_LEVEL_EASY;
 import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_SHAKE_ACTION;
 import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_VIBRATION_START_DELAY;
 import static com.best.deskclock.settings.PreferencesDefaultValues.TIMEOUT_NEVER;
@@ -150,8 +154,9 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
     ListPreference mFlipActionPref;
     ListPreference mShakeActionPref;
     CustomSliderPreference mShakeIntensityPref;
+    ListPreference mAlarmChallengeTypePref;
+    AlarmMathHardnessLevelPreference mAlarmMathHardnessLevelPref;
     SwitchPreferenceCompat mEnablePerAlarmMathHardnessLevelPref;
-    SwitchPreferenceCompat mEnableQrCodeChallengePref;
     Preference mAlarmQrCodePref;
     ListPreference mSortAlarmPref;
     SwitchPreferenceCompat mDisplayEnabledAlarmsFirstPref;
@@ -270,8 +275,9 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
         mFlipActionPref = findPreference(KEY_FLIP_ACTION);
         mShakeActionPref = findPreference(KEY_SHAKE_ACTION);
         mShakeIntensityPref = findPreference(KEY_SHAKE_INTENSITY);
+        mAlarmChallengeTypePref = findPreference(KEY_ALARM_CHALLENGE_TYPE);
+        mAlarmMathHardnessLevelPref = findPreference(KEY_ALARM_MATH_HARDNESS_LEVEL);
         mEnablePerAlarmMathHardnessLevelPref = findPreference(KEY_ENABLE_PER_ALARM_MATH_HARDNESS_LEVEL);
-        mEnableQrCodeChallengePref = findPreference(KEY_ENABLE_QR_CODE_CHALLENGE);
         mAlarmQrCodePref = findPreference(KEY_ALARM_QR_CODE);
         mSortAlarmPref = findPreference(KEY_SORT_ALARM);
         mDisplayEnabledAlarmsFirstPref = findPreference(KEY_DISPLAY_ENABLED_ALARMS_FIRST);
@@ -399,17 +405,33 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
                 }
             }
 
-            case KEY_ENABLE_QR_CODE_CHALLENGE -> {
-                Utils.performHapticFeedback(getView(), isVibrationsEnabled(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            case KEY_ALARM_CHALLENGE_TYPE -> {
+                final String challengeType = (String) newValue;
 
-                if ((boolean) newValue) {
-                    // The setting is only enabled once a QR code has been successfully registered
+                if (challengeType.equals(ALARM_CHALLENGE_TYPE_QR_CODE)
+                    && SettingsDAO.getAlarmQrCode(getPrefs()).isEmpty()) {
+                    // This challenge type is only selected once a QR code has been successfully registered
                     qrCodeScannerLauncher.launch(null);
                     return false;
-                } else {
-                    getPrefs().edit().remove(KEY_ALARM_QR_CODE).apply();
-                    mAlarmQrCodePref.setVisible(false);
                 }
+
+                if (challengeType.equals(ALARM_CHALLENGE_TYPE_MATH)
+                    && SettingsDAO.getAlarmMathHardnessLevel(getPrefs()).equals(DEFAULT_MATH_HARDNESS_LEVEL)) {
+                    // A math challenge with the hardness level set to "Off" would never be displayed
+                    mAlarmMathHardnessLevelPref.setMathHardnessLevel(MATH_HARDNESS_LEVEL_EASY);
+
+                    if (SettingsDAO.isPerAlarmMathHardnessLevelDisabled(getPrefs())) {
+                        AppExecutors.getDiskIO().execute(() -> {
+                            List<Alarm> currentAlarms = Alarm.getAlarms(cr, null);
+                            for (Alarm alarm : currentAlarms) {
+                                alarm.mathHardnessLevel = MATH_HARDNESS_LEVEL_EASY;
+                                mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+                            }
+                        });
+                    }
+                }
+
+                updateChallengePreferences(challengeType);
             }
 
             case KEY_ENABLE_PER_ALARM_SNOOZE_DURATION -> {
@@ -653,6 +675,25 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
         return true;
     }
 
+    /**
+     * Update the summary of the challenge type preference and show only the preferences
+     * relevant to the selected challenge type.
+     */
+    private void updateChallengePreferences(@NonNull String challengeType) {
+        final int index = mAlarmChallengeTypePref.findIndexOfValue(challengeType);
+        if (index >= 0) {
+            mAlarmChallengeTypePref.setSummary(mAlarmChallengeTypePref.getEntries()[index]);
+        }
+
+        final boolean isMathChallenge = challengeType.equals(ALARM_CHALLENGE_TYPE_MATH);
+        mAlarmMathHardnessLevelPref.setVisible(isMathChallenge);
+        mEnablePerAlarmMathHardnessLevelPref.setVisible(isMathChallenge);
+
+        final boolean isRegisteredQrCodeChallenge = challengeType.equals(ALARM_CHALLENGE_TYPE_QR_CODE);
+        mAlarmQrCodePref.setVisible(isRegisteredQrCodeChallenge);
+        mAlarmQrCodePref.setSummary(SettingsDAO.getAlarmQrCode(getPrefs()));
+    }
+
     private void handleScannedQrCode(QRResult result) {
         final Context appContext = requireContext().getApplicationContext();
 
@@ -666,9 +707,8 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
 
             getPrefs().edit().putString(KEY_ALARM_QR_CODE, rawValue).apply();
 
-            mEnableQrCodeChallengePref.setChecked(true);
-            mAlarmQrCodePref.setVisible(true);
-            mAlarmQrCodePref.setSummary(rawValue);
+            mAlarmChallengeTypePref.setValue(ALARM_CHALLENGE_TYPE_QR_CODE);
+            updateChallengePreferences(ALARM_CHALLENGE_TYPE_QR_CODE);
 
             CustomToast.show(appContext, getAccentStyle(), getGeneralTypeface(), R.string.qr_code_registered);
         } else if (result instanceof QRResult.QRMissingPermission) {
@@ -803,12 +843,11 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
             mShakeIntensityPref.setVisible(SettingsDAO.getShakeAction(getPrefs()) != 0);
         }
 
+        mAlarmChallengeTypePref.setOnPreferenceChangeListener(this);
+        updateChallengePreferences(SettingsDAO.getAlarmChallengeType(getPrefs()));
+
         mEnablePerAlarmMathHardnessLevelPref.setOnPreferenceChangeListener(this);
 
-        mEnableQrCodeChallengePref.setOnPreferenceChangeListener(this);
-
-        mAlarmQrCodePref.setVisible(SettingsDAO.isQrCodeChallengeEnabled(getPrefs()));
-        mAlarmQrCodePref.setSummary(SettingsDAO.getAlarmQrCode(getPrefs()));
         mAlarmQrCodePref.setOnPreferenceClickListener(this);
 
         mSortAlarmPref.setOnPreferenceChangeListener(this);

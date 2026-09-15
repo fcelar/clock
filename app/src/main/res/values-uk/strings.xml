@@ -728,7 +728,6 @@
     <string name="math_hardness_level_title">Рівень складності математичних прикладів</string>
     <string name="enable_per_alarm_math_hardness_level_dialog_message">Користувацькі рівні складності математичних прикладів буде скинуто.%s</string>
     <string name="enable_per_alarm_math_hardness_level_title">Окремий рівень складності математичних прикладів для кожного будильника</string>
-    <string name="math_challenge_category_title">Математичні завдання</string>
     <string name="math_hardness_level_easy">Простий</string>
     <string name="math_hardness_level_normal">Звичайний</string>
     <string name="math_hardness_level_hard">Складний</string>

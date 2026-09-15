@@ -109,7 +109,7 @@ public class PreferencesKeys {
     public static final String KEY_SHAKE_INTENSITY = "key_shake_intensity";
     public static final String KEY_ALARM_MATH_HARDNESS_LEVEL = "key_alarm_math_hardness_level";
     public static final String KEY_ENABLE_PER_ALARM_MATH_HARDNESS_LEVEL = "key_enable_per_alarm_math_hardness_level";
-    public static final String KEY_ENABLE_QR_CODE_CHALLENGE = "key_enable_qr_code_challenge";
+    public static final String KEY_ALARM_CHALLENGE_TYPE = "key_alarm_challenge_type";
     public static final String KEY_ALARM_QR_CODE = "key_alarm_qr_code";
     public static final String KEY_SORT_ALARM = "key_sort_alarm";
     public static final String KEY_DISPLAY_ENABLED_ALARMS_FIRST = "key_display_enabled_alarms_first";

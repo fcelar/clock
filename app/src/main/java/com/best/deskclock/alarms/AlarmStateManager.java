@@ -421,10 +421,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
 
         Events.sendAlarmEvent(R.string.action_fire, 0);
 
-        String mathHardnessLevel = SettingsDAO.isPerAlarmMathHardnessLevelDisabled(prefs) || alarm == null
-            ? SettingsDAO.getAlarmMathHardnessLevel(prefs)
-            : alarm.mathHardnessLevel;
-        boolean hasMission = !mathHardnessLevel.equals(DEFAULT_MATH_HARDNESS_LEVEL)
+        boolean hasMission = !SettingsDAO.getEffectiveMathHardnessLevel(prefs, alarm).equals(DEFAULT_MATH_HARDNESS_LEVEL)
             || SettingsDAO.isQrCodeChallengeEnabled(prefs);
 
         Calendar timeout = instance.getTimeout(context, hasMission);
@@ -780,10 +777,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         final Calendar currentTime = getCurrentTime();
         final Calendar alarmTime = instance.getAlarmTime();
 
-        String mathHardnessLevel = SettingsDAO.isPerAlarmMathHardnessLevelDisabled(prefs) || alarm == null
-            ? SettingsDAO.getAlarmMathHardnessLevel(prefs)
-            : alarm.mathHardnessLevel;
-        boolean hasMission = !mathHardnessLevel.equals(DEFAULT_MATH_HARDNESS_LEVEL)
+        boolean hasMission = !SettingsDAO.getEffectiveMathHardnessLevel(prefs, alarm).equals(DEFAULT_MATH_HARDNESS_LEVEL)
             || SettingsDAO.isQrCodeChallengeEnabled(prefs);
 
         final Calendar timeoutTime = instance.getTimeout(context, hasMission);

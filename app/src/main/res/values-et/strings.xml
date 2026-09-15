@@ -700,7 +700,6 @@
     <string name="math_challenge_answer_hint">Sinu vastus</string>
     <string name="math_challenge_prompt">Arvuta: %1$d + %2$d?</string>
     <string name="math_challenge_wrong_answer">Vigane vastus</string>
-    <string name="math_challenge_category_title">Matemaatikaülesanne</string>
     <string name="math_hardness_level_title">Matemaatikaülesande keerukus</string>
     <string name="math_hardness_level_easy">Lihtne</string>
     <string name="math_hardness_level_normal">Tavaline</string>

@@ -301,9 +301,19 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/math_challenge_category_title"
+        android:title="@string/challenge_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:key="key_alarm_challenge_type"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/alarm_challenge_type_title"
+            android:entries="@array/alarm_challenge_type_entries"
+            android:entryValues="@array/alarm_challenge_type_values"
+            android:defaultValue="off"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
 
         <com.best.deskclock.settings.custompreference.AlarmMathHardnessLevelPreference
             android:key="key_alarm_math_hardness_level"
@@ -316,21 +326,6 @@
             android:key="key_enable_per_alarm_math_hardness_level"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/enable_per_alarm_math_hardness_level_title"
-            android:defaultValue="false"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/qr_code_challenge_category_title"
-        app:allowDividerAbove="false"
-        app:iconSpaceReserved="false">
-
-        <SwitchPreferenceCompat
-            android:key="key_enable_qr_code_challenge"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/enable_qr_code_challenge_title"
             android:defaultValue="false"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />

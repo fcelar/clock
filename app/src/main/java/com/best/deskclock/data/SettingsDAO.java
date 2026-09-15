@@ -24,6 +24,7 @@ import android.icu.text.TimeZoneNames;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.best.deskclock.R;
 import com.best.deskclock.data.DataModel.CitySort;
@@ -31,6 +32,7 @@ import com.best.deskclock.data.DataModel.ClockStyle;
 import com.best.deskclock.data.DataModel.HeadphonesButtonBehavior;
 import com.best.deskclock.data.DataModel.PowerButtonBehavior;
 import com.best.deskclock.data.DataModel.VolumeButtonBehavior;
+import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.utils.SdkUtils;
 import com.best.deskclock.utils.ThemeUtils;
 
@@ -1080,15 +1082,55 @@ public final class SettingsDAO {
     }
 
     /**
-     * @return {@code true} if a QR code must be scanned to dismiss alarms. {@code false} otherwise.
+     * @return the type of challenge required to snooze or dismiss alarms:
+     * {@code off}, {@code math}, {@code qr_code} (a registered QR code) or {@code any_qr_code}.
      */
-    public static boolean isQrCodeChallengeEnabled(@NonNull SharedPreferences pref) {
+    public static String getAlarmChallengeType(@NonNull SharedPreferences pref) {
         // Default value must match the one in res/xml/settings_alarm.xml
-        return pref.getBoolean(KEY_ENABLE_QR_CODE_CHALLENGE, DEFAULT_ENABLE_QR_CODE_CHALLENGE);
+        return pref.getString(KEY_ALARM_CHALLENGE_TYPE, DEFAULT_ALARM_CHALLENGE_TYPE);
     }
 
     /**
-     * @return the content of the registered QR code that must be scanned to dismiss alarms.
+     * @return {@code true} if a math problem must be solved to snooze or dismiss alarms. {@code false} otherwise.
+     */
+    public static boolean isMathChallengeEnabled(@NonNull SharedPreferences pref) {
+        return getAlarmChallengeType(pref).equals(ALARM_CHALLENGE_TYPE_MATH);
+    }
+
+    /**
+     * @return {@code true} if a QR code (registered or any) must be scanned to snooze or dismiss alarms.
+     * {@code false} otherwise.
+     */
+    public static boolean isQrCodeChallengeEnabled(@NonNull SharedPreferences pref) {
+        final String type = getAlarmChallengeType(pref);
+        return type.equals(ALARM_CHALLENGE_TYPE_QR_CODE) || type.equals(ALARM_CHALLENGE_TYPE_ANY_QR_CODE);
+    }
+
+    /**
+     * @return {@code true} if any QR code is accepted to snooze or dismiss alarms. {@code false} if only
+     * the registered QR code is accepted.
+     */
+    public static boolean isAnyQrCodeAccepted(@NonNull SharedPreferences pref) {
+        return getAlarmChallengeType(pref).equals(ALARM_CHALLENGE_TYPE_ANY_QR_CODE);
+    }
+
+    /**
+     * @return the math hardness level to apply for the given alarm, taking into account the selected
+     * challenge type and the per-alarm setting. Returns the default level (off) if the math challenge
+     * is not the selected challenge type.
+     */
+    public static String getEffectiveMathHardnessLevel(@NonNull SharedPreferences pref, @Nullable Alarm alarm) {
+        if (!isMathChallengeEnabled(pref)) {
+            return DEFAULT_MATH_HARDNESS_LEVEL;
+        }
+
+        return isPerAlarmMathHardnessLevelDisabled(pref) || alarm == null
+            ? getAlarmMathHardnessLevel(pref)
+            : alarm.mathHardnessLevel;
+    }
+
+    /**
+     * @return the content of the registered QR code that must be scanned to snooze or dismiss alarms.
      */
     public static String getAlarmQrCode(@NonNull SharedPreferences prefs) {
         return prefs.getString(KEY_ALARM_QR_CODE, DEFAULT_ALARM_QR_CODE);
